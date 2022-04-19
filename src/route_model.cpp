@@ -11,14 +11,19 @@ RouteModel::RouteModel(const std::vector<std::byte> &xml) : Model(xml) {
     CreateNodeToRoadHashmap();
 }
 
-
+// Create map from index of each node to road that it belongs to. 
+// In OSM lingo, a road is 'relation' and this hashmap essentially skips the intermediate level 'way' by building a data structure that connects roads (relations) with nodes.  
 void RouteModel::CreateNodeToRoadHashmap() {
+    // for all roads in the model, check that road is not a footway
     for (const Model::Road &road : Roads()) {
         if (road.type != Model::Road::Type::Footway) {
+            // get all node indices on way that road belongs to. 
             for (int node_idx : Ways()[road.way].nodes) {
+                // if node index is not already in hashmap, create empty vector
                 if (node_to_road.find(node_idx) == node_to_road.end()) {
                     node_to_road[node_idx] = std::vector<const Model::Road *> ();
                 }
+                // put road in vector associated with node index. 
                 node_to_road[node_idx].push_back(&road);
             }
         }
